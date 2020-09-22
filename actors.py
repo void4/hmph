@@ -1,4 +1,4 @@
-import cgi
+import html
 
 from envs import Env, global_env
 from parser import parse
@@ -15,8 +15,8 @@ class Expression:
         self.inner_map = inner_map
 
     def uneval(self, context, label):
-        return context.uncall('actors.Expression', 
-                              text=self.text, 
+        return context.uncall('actors.Expression',
+                              text=self.text,
                               inner_map=self.inner_map)
 
     def __repr__(self):
@@ -58,7 +58,7 @@ def mark_up_expression(text, inner_map, env):
     return result
 
 def escape_with_lines(text):
-    text = cgi.escape(text)
+    text = html.escape(text)
     return '<br>\n'.join(text.split('\n'))
 
 
@@ -97,16 +97,16 @@ class Text(Element):
         self.body = body
 
     def uneval(self, context, label):
-        return context.uncall('actors.Text', 
+        return context.uncall('actors.Text',
                               body=self.body,
                               serial_id=self.serial_id)
 
     def get_body(self):
         return self.body
-    
+
     def set_body(self, body):
         self.body = body
-    
+
     def get_heading(self):
         return ''
 
@@ -129,25 +129,25 @@ class Example(Element):
         self.selector = None
 
     def uneval(self, context, label):
-        buildme = context.uncall('actors.Example', 
+        buildme = context.uncall('actors.Example',
                                  expression=self.expression,
                                  serial_id=self.serial_id)
-        additions = [context.uncall('_add_result', 
-                                    actor=actor, 
+        additions = [context.uncall('_add_result',
+                                    actor=actor,
                                     result=self.results[actor])
                      for actor in self.results]
         return context.unsequence(buildme, label, additions)
-    
+
     def _add_result(self, actor, result):
         self.results[actor] = result
 
     def get_body(self):
         return self.expression.text
-    
+
     def set_body(self, body):
         self.expression.set_text(body)
         self.results = {}
-    
+
     def get_heading(self):
         return ''
 
@@ -163,12 +163,12 @@ class Example(Element):
             self._add_result(actor, self._run(actor))
         result = self.results[actor]
         if type(result) == type(''):
-            result_html = cgi.escape(result)
+            result_html = html.escape(result)
         else:
             # XXX we don't necessarily have editor privileges on the result
             result_html = '<a href="%s">%s</a>' % (get_uri(get_editor(result)),
                                                    result.link_caption())
-        return '? %s<br>%s' % (self.expression.mark_up(actor.get_env()), 
+        return '? %s<br>%s' % (self.expression.mark_up(actor.get_env()),
                                result_html)
 
     def _run(self, actor):
@@ -194,20 +194,20 @@ class Method(Element):
             self.body = body
 
     def uneval(self, context, label):
-        return context.uncall('actors.Method', 
-                              selector=self.selector, 
-                              parameters=self.parameters, 
+        return context.uncall('actors.Method',
+                              selector=self.selector,
+                              parameters=self.parameters,
                               body=self.body,
                               serial_id=self.serial_id)
-    
+
     def get_body(self):
         return self.body.text
-    
+
     def set_body(self, body):
         self.body.set_text(body)
 
     def get_heading(self):
-        return '<h3>%s</h3>' % cgi.escape(self.get_signature())
+        return '<h3>%s</h3>' % html.escape(self.get_signature())
 
     def set_inner(self, name, script):
         self.body.set_inner(name, script)
@@ -250,7 +250,7 @@ class Method(Element):
             return heading
         else:
             call = rest.method_call_form(actor or script,
-                                         self.selector, 
+                                         self.selector,
                                          self._argument_field())
             return '''
 <table>
@@ -270,7 +270,7 @@ class Method(Element):
         else:
             maybe_call = \
                 rest.method_call_form(actor or script,
-                                      self.selector, 
+                                      self.selector,
                                       self._argument_field())
             env = actor.get_env()
         if editable:
@@ -298,7 +298,7 @@ class Method(Element):
                 'body': self.mark_up_body(env) }
 
     def call(self, actor, selector, arguments):
-        return self.body.eval(Env(actor.get_env(), 
+        return self.body.eval(Env(actor.get_env(),
                                   bind(self.parameters, arguments)),
                               actor)
 
@@ -306,7 +306,7 @@ class OtherwiseMethod:
 
     def __init__(self, method):
         self.method = method
-        
+
     def call(self, actor, selector, arguments):
         new_arguments = list_to_actor([string_to_actor(selector)] + arguments)
         return self.method.call(self, selector, new_arguments)
@@ -314,7 +314,7 @@ class OtherwiseMethod:
 
 def bind(vars, vals):
     if len(vars) != len(vals):
-        raise 'Argument count mismatch', (vars, vals)
+        raise Exception('Argument count mismatch', (vars, vals))
     result = {}
     for var, val in zip(vars, vals):
         result[var] = val
@@ -330,7 +330,7 @@ class ActorEditor:
         self.primitive_data = None
 
     def uneval(self, context, label):
-        return context.uncall('actors.ActorEditor', 
+        return context.uncall('actors.ActorEditor',
                               actor=self.actor,
                               editable=self.editable)
 
@@ -348,34 +348,34 @@ class ActorEditor:
 
     def delete_element(self, serial_id):
         if not self.editable:
-            raise 'Not editable'
+            raise Exception('Not editable')
         return self.actor.get_script().delete_element(serial_id)
 
     def set_method_body(self, selector, body):
         if not self.editable:
-            raise 'Not editable'
+            raise Exception('Not editable')
         return self.actor.get_script().set_method_body(selector, body)
 
     def add_element(self, element):
         if not self.editable:
-            raise 'Not editable'
+            raise Exception('Not editable')
         return self.actor.get_script().add_element(element)
 
     def add_example(self, expression):
         if not self.editable:
-            raise 'Not editable'
+            raise Exception('Not editable')
         example = Example(expression)
         self.add_element(example)
         return example
 
     def add_method(self, selector, parameters):
         if not self.editable:
-            raise 'Not editable'
+            raise Exception('Not editable')
         return self.actor.get_script().add_method(selector, parameters)
 
     def add_text(self, body):
         if not self.editable:
-            raise 'Not editable'
+            raise Exception('Not editable')
         return self.actor.get_script().add_text(body)
 
     def show(self):
@@ -385,11 +385,11 @@ class ActorEditor:
 
     def show_editable(self, serial_id):
         if not self.editable:
-            raise 'Not editable'
+            raise Exception('Not editable')
         return self.actor.get_script().show_editable(serial_id, self)
 
     def call(self, selector, arguments):
-        # XXX This should only *try* to get an editor view on the 
+        # XXX This should only *try* to get an editor view on the
         # result, using a can-opener capability.  Might not succeed.
         return get_editor(self.actor.call(selector, arguments))
 
@@ -415,10 +415,10 @@ class Script:
             self.add_element(element)
 
     def uneval(self, context, label):
-        return context.uncall('actors.Script', 
+        return context.uncall('actors.Script',
                               next_serial_id=self.next_serial_id,
                               elements=self.elements)
-    
+
     def may_edit(self):
         # XXX I'm assuming a predefined immutable script like for
         # the Number type never gets in a position where it's asked
@@ -434,7 +434,7 @@ class Script:
         for elt in self.elements:
             if elt.serial_id == serial_id:
                 return elt
-        raise 'Element not found', serial_id
+        raise Exception('Element not found', serial_id)
 
     def delete_element(self, serial_id):
         previous_element = None
@@ -443,7 +443,7 @@ class Script:
                 del self.elements[i]
                 return previous_element
             previous_element = self.elements[i]
-        raise 'Element not found', serial_id
+        raise Exception('Element not found', serial_id)
 
     def get_method(self, selector):
         for elt in self.elements:
@@ -478,19 +478,19 @@ class Script:
         return rest.adder_form(actor or self)
 
     def show_bare(self, actor=None):
-        parts = ['<a name="%s">%s</a>' % (elt.serial_id, 
+        parts = ['<a name="%s">%s</a>' % (elt.serial_id,
                                           elt.show_bare(self, actor)) \
                  for elt in self.elements]
-        # XXX leave out <hr>'s for empty elements 
+        # XXX leave out <hr>'s for empty elements
         return '<hr>\n'.join(parts)
 
     # N.B. editable=True for the same reason self.may_edit() = True
     def show(self, actor=None, editable=True):
-        parts = ['<a name="%s">%s</a>' % (elt.serial_id, 
+        parts = ['<a name="%s">%s</a>' % (elt.serial_id,
                                           elt.show(self, actor, editable)) \
                  for elt in self.elements]
         html = '<hr>\n'.join(parts)
-        if editable: 
+        if editable:
             html += self._adder_form(actor)
         return html
 
@@ -503,12 +503,12 @@ class Script:
                 part = element.show(self, actor, True)
             parts.append('<a name="%s">%s</a>' % (element.serial_id, part))
         return '<hr>\n'.join(parts)   # + self._adder_form(actor)
-        
+
     def _element_editor_form(self, serial_id, actor):
         element = self.get_element(serial_id)
         heading = element.get_heading()
-        form = rest.element_editor_form(actor or self, 
-                                        serial_id, 
+        form = rest.element_editor_form(actor or self,
+                                        serial_id,
                                         element.get_body())
         if heading != '':
             return '<h3>%s</h3>%s' % (heading, form)
@@ -521,10 +521,10 @@ class Script:
         for elt in self.elements:
             if elt.selector == 'otherwise':
                 return OtherwiseMethod(elt)
-        raise 'No matching method', selector
+        raise Exception('No matching method', selector)
 
     def call(self, selector, arguments):
-        raise 'This is a script, not an actor'
+        raise Exception('This is a script, not an actor')
 
 
 class Actor:
@@ -536,11 +536,11 @@ class Actor:
 
     def uneval(self, context, label):
         if self.primitive_data is None:
-            return context.uncall('actors.Actor', 
+            return context.uncall('actors.Actor',
                                   env=self.env,
                                   script=self.script)
         else:
-            return context.uncall('actors.Actor', 
+            return context.uncall('actors.Actor',
                                   env=self.env,
                                   script=self.script,
                                   primitive_data=self.primitive_data)
@@ -585,7 +585,7 @@ class StampedActor:             # XXX inherit from an abstract Actor class
         self.stamp = stamp
 
     def uneval(self, context, label):
-        return context.uncall('actors.StampedActor', 
+        return context.uncall('actors.StampedActor',
                               actor=self.actor,
                               stamp=self.stamp)
 

@@ -6,13 +6,13 @@ import time
 at_id = {}
 id_of_actor = {}
 
-swiss_range = 2L**80
+swiss_range = 2**80
 
 def get_uri(actor):
-    return '/id/%s' % get_id(actor)    
+    return '/id/%s' % get_id(actor)
 
 def id_is_defined(hid):
-    print 'checking', hid
+    print('checking', hid)
     return hid in at_id
 
 def get_id(actor):
@@ -21,16 +21,16 @@ def get_id(actor):
         while True:
             new_id = random.randint(0, swiss_range)
             hid = hex(new_id)[2:-1].lower()
-            if hid not in at_id: 
+            if hid not in at_id:
                 break
-        print 'adding', hid
+        print('adding', hid)
         at_id[hid] = Entry(actor)
         id_of_actor[actor] = hid
     return id_of_actor[actor]
 
 def get_actor(hid):
     if hid not in at_id:
-        raise 'No such actor', hid
+        raise Exception('No such actor', hid)
     return at_id[hid].actor
 
 def access_id(hid):
@@ -43,9 +43,9 @@ class Entry:
             timestamp = time.time()
         self.actor = actor
         self.timestamp = timestamp
-    
+
     def uneval(self, context, label):
-        return context.uncall('registry.Entry', 
+        return context.uncall('registry.Entry',
                               actor=self.actor,
                               timestamp=self.timestamp)
 
@@ -62,7 +62,7 @@ def get_editor(actor):
     if actor not in editor_of_actor:
         editor_of_actor[actor] = ActorEditor(actor, actor.may_edit())
     return editor_of_actor[actor]
-    
+
 
 accounts = []
 
@@ -79,17 +79,17 @@ class HmphSystem:
 
     def uneval(self, context, label):
         return context.uncall('registry.HmphSystem',
-                              at_id=self.at_id, 
+                              at_id=self.at_id,
                               editor_of_actor=self.editor_of_actor,
                               accounts=self.accounts)
-        
+
 
 def get_system():
     return HmphSystem(at_id, editor_of_actor, accounts)
 
 def load_system():
     import snapshot
-    try: 
+    try:
         hmph = snapshot.root
     except AttributeError:
         return                  # XXX should reset the system here

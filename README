@@ -20,4 +20,4 @@ $ python hmph.py
 
 Then point your web browser to http://localhost:8080/
 
-This is known to work in Python 2.3.3.  The code's pretty hacky, though...
+Python3 port fork of https://github.com/darius/hmph

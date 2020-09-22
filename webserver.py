@@ -1,8 +1,8 @@
-from BaseHTTPServer import BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler
 import cgi
-import sre
+import re
 import sys
-import urlparse
+import urllib.parse
 
 
 class DispatchingHTTPRequestHandler(BaseHTTPRequestHandler):
@@ -25,7 +25,7 @@ class DispatchingHTTPRequestHandler(BaseHTTPRequestHandler):
         return parse_qs(data)
 
     def _handle(self, handlers, parse_query):
-        _, _, path_str, _, query_str, _ = urlparse.urlparse(self.path)
+        _, _, path_str, _, query_str, _ = urllib.parse.urlparse(self.path)
         if path_str[0:1] == '/': # XXX does this ever not happen?
             path_str = path_str[1:]
         handler, params = _lookup(handlers, path_str)
@@ -44,7 +44,7 @@ class DispatchingHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_response(302, uri)
         self.send_header('Location', uri)
         self.send_header('Content-type', 'text/html')
-        self.end_headers() 
+        self.end_headers()
         self.wfile.write('Redirect to <a href="%s">%s</a>' % (uri, uri))
 
     def send_html(self, body):
@@ -58,7 +58,7 @@ def parse_qs(string):
     result = {}
     for key in query:
         if len(query[key]) != 1:
-            raise 'Multiple values for key', key
+            raise Exception('Multiple values for key', key)
         result[key] = query[key][0]
     return result
 
@@ -73,7 +73,7 @@ def parse_name(name):
     parts = name.split('_')
     patterns = [cond(part == 'V', r'([0-9a-f]+)', part) for part in parts]
     name = '/'.join(patterns) + '$'
-    return name, sre.compile(name)
+    return name, re.compile(name)
 
 def cond(test, yes, no):
     if test: return yes

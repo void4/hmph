@@ -1,4 +1,4 @@
-import sre
+import re
 
 from registry import get_actor, get_editor, get_id
 
@@ -65,7 +65,7 @@ class Parser:
         return result, self.decorators
 
     def primitive(self, probe=False):
-        if probe: 
+        if probe:
             return self.token(self.keyword_primitive, True)
         src_pos = self.i
         self.token(self.keyword_primitive)
@@ -161,7 +161,7 @@ class Parser:
             return StringLitExpr((src_pos, self.i), cook_string(lit))
         elif self.token(self.http_lit, True):
             lit = self.token(self.http_lit)
-            m = sre.match(self.http_lit, lit)
+            m = re.match(self.http_lit, lit)
             range = (src_pos, self.i)
             self.decorate(range, format_http_link)
             return HttpLitExpr(range, m.group(2))
@@ -206,7 +206,7 @@ class Parser:
             raise ParseError(self, 'Bad primary')
 
     def nested_object(self, probe=False):
-        if probe: 
+        if probe:
             return self.token(self.keyword_make, True)
         src_pos = self.i
         self.token(self.keyword_make)
@@ -220,11 +220,11 @@ class Parser:
 
     def token(self, pattern, probe=False):
         # XXX this code should be shorter
-        s = sre.match(r'\s+', self.str[self.i:])
-        if s: 
+        s = re.match(r'\s+', self.str[self.i:])
+        if s:
             self.i += s.end()
-        m = sre.match(pattern, self.str[self.i:])
-        if not m: 
+        m = re.match(pattern, self.str[self.i:])
+        if not m:
             return False
         if probe:
             return True
@@ -233,7 +233,7 @@ class Parser:
         return self.str[start:end]
 
     def token_and_range(self, pattern):
-        m = sre.match(pattern, self.str[self.i:])
+        m = re.match(pattern, self.str[self.i:])
         start, end = self.i + m.start(), self.i + m.end()
         self.i += m.end()
         return self.str[start:end], (start, end)
@@ -275,7 +275,7 @@ class Code:
     def run(self, actor, env):
         return self.eval(env)
     def as_signature(self):
-        raise 'Bad pattern'
+        raise Exception('Bad pattern')
 
 class Primitive(Code):
     def __init__(self, src_range, name):
@@ -285,7 +285,7 @@ class Primitive(Code):
         return 'primitive %s' % self.name
     def run(self, actor, env):
         if actor.primitive_data is None:
-            raise 'No primitive data', actor
+            raise Exception('No primitive data', actor)
         return getattr(actor, 'prim_' + self.name)(env)
 
 class EmptyStmt(Code):
@@ -334,13 +334,14 @@ class LetExpr(Code):
         return value
 
 class CallExpr(Code):
-    def __init__(self, src_range, subject, (selector, arg_exprs)):
+    def __init__(self, src_range, subject, selector_args):
+        (selector, arg_exprs) = selector_args
         Code.__init__(self, src_range)
         self.subject = subject
         self.selector = selector
         self.arg_exprs = arg_exprs
     def __repr__(self):
-        args = ', '.join([`e` for e in self.arg_exprs])
+        args = ', '.join([repr(e) for e in self.arg_exprs])
         if args == '':
             return '(%s %s)' % (self.subject, self.selector)
         elif len(self.arg_exprs) == 1:
@@ -382,7 +383,7 @@ class NumericLitExpr(Code):
         Code.__init__(self, src_range)
         self.literal = literal
     def __repr__(self):
-        return `self.literal`
+        return repr(self.literal)
     def eval(self, env):
         from builtin import Number # XXX circular module dependency
         return Number(self.literal)
@@ -416,9 +417,9 @@ class HttpLitExpr(Code):
 
 def test_syntax(str, reunparsed):
     code, decorators = parse(str)
-    result = `code`
+    result = repr(code)
     if result != reunparsed:
-        raise 'Bad parse/unparse', result
+        raise Exception('Bad parse/unparse', result)
 
 def parser_tests():
     test_syntax('primitive  multiply', 'primitive multiply')

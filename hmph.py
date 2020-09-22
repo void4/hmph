@@ -1,4 +1,4 @@
-from BaseHTTPServer import HTTPServer
+from http.server import HTTPServer
 
 import doss
 import registry
@@ -12,7 +12,7 @@ def start():
     global server
     registry.load_system()
     server = HTTPServer(('', 8080), rest.HmphHTTPRequestHandler)
-    print 'started httpserver...'
+    print('started httpserver...')
     serve()
 
 def serve():
@@ -22,7 +22,7 @@ def main():
     try:
         start()
     except KeyboardInterrupt:
-        print '^C received, shutting down server'
+        print('^C received, shutting down server')
         server.socket.close()
         import os
         # XXX raises an exception in Windows if oldsnapshot exists

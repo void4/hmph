@@ -67,7 +67,7 @@ class Context:                # XXX what's a better name than context?
         return Unsequence(uncall, label, method_uncalls)
 
 
-simple_data_types = map(type, [0, 0.0, 0L, '', True, None])
+simple_data_types = list(map(type, [0, 0.0, 0, '', True, None]))
 
 def is_simple_data(object):
     return type(object) in simple_data_types
@@ -105,7 +105,7 @@ class Defs:
         if type(depiction) == type(()):
             return tuple(map(self.walk, depiction))
         if type(depiction) == type([]):
-            return map(self.walk, depiction)
+            return list(map(self.walk, depiction))
         if type(depiction) == type({}):
             result = {}
             for key in depiction:

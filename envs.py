@@ -10,12 +10,12 @@ class Env:
 
     def uneval(self, context, label):
         buildme = context.uncall('envs.Env', parent=self.parent)
-        defns = [context.uncall('define', 
-                                var=key, 
+        defns = [context.uncall('define',
+                                var=key,
                                 value=self.locals[key])
                  for key in self.locals]
         return context.unsequence(buildme, label, defns)
-    
+
     def get(self, var):
         if var in self.locals:
             return self.locals[var]
@@ -26,7 +26,7 @@ class Env:
     def must_get(self, var):
         value = self.get(var)
         if value is None:
-            raise 'Unbound', var
+            raise Exception('Unbound', var)
         return value
 
     # XXX mutable environments are more of a problem than a help,

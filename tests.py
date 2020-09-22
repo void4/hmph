@@ -10,23 +10,22 @@ def test_expr(env, str, expected_result):
     code, decorators = parse(str)
     result = code.eval(env)
     if not(eqv(result, expected_result)):
-        raise 'Bad result', result
+        raise Exception('Bad result', result)
 
 def should_raise(env, str, exception_type):
     code, decorators = parse(str)
     try:
         code.eval(env)
-    except:
-        foo = sys.exc_info()
-        if exception_type != foo[0]:
-            raise foo
+    except Exception as e:
+        if exception_type != e.args[0]:
+            raise Exception(e.args[0])
     else:
-        raise 'Expected an exception', exception_type
+        raise Exception('Expected an exception', exception_type)
 
 def tests():
     parser_tests()
     a = Actor(global_env,
-              Script([Method('method1', [], 'Hurary'), 
+              Script([Method('method1', [], 'Hurary'),
                       Method('method2:', ['x'], 'x')]))
     n = Number(3)
     env = Env(None, {'a': a, 'n': n})

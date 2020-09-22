@@ -7,12 +7,12 @@ def emit(obj, attribute=False):
         return cgi.escape(obj, attribute)
     if type(obj) == type(emit):
         return obj()            # XXX what if attribute=True?
-    raise 'Bad type', obj
+    raise Exception('Bad type', obj)
 
 def emit_attributes(dict):
     attrs = []
     for key in dict:
-        attrs.append(' %s="%s"' % (cgi.escape(key), 
+        attrs.append(' %s="%s"' % (cgi.escape(key),
                                    emit(dict[key], attribute=True)))
     return ''.join(attrs)
 
@@ -38,25 +38,25 @@ Input = make_lonetag_emitter('input')
 
 
 def method_call_form(target, selector, argument_html):
-    return Form(method='POST', 
+    return Form(method='POST',
                 action=get_uri(target) + '/call',
                 _=[Input(type='hidden', name='selector', value=selector)] + \
                   argument_html)()
 
 def element_delete_form(target, serial_id):
-    return Form(method='POST', 
+    return Form(method='POST',
                 action=get_uri(target) + '/delete',
                 _=[Input(type='hidden', name='serial_id', value=serial_id),
                    Input(type='submit', value='Delete')])()
 
 def element_edit_form(target, serial_id):
-    return Form(method='GET', 
+    return Form(method='GET',
                 action=get_uri(target) + '/edit#' + serial_id,
                 _=[Input(type='hidden', name='serial_id', value=serial_id),
                    Input(type='submit', value='Edit')])()
 
 def element_editor_form(target, serial_id, body):
-    return Form(method='POST', 
+    return Form(method='POST',
                 action=get_uri(target) + '/update',
                 _=[Input(type='hidden', name='serial_id', value=serial_id),
                    Input(type='submit', value='Save'),
@@ -64,16 +64,16 @@ def element_editor_form(target, serial_id, body):
 
 def adder_form(target):         # XXX rename
     uri = get_uri(target)
-    form1 = Form(method='POST', action=uri + '/addmethod', 
+    form1 = Form(method='POST', action=uri + '/addmethod',
                  _=[Input(type='textarea', name='content'),
                     Input(type='submit', value='Add method')])
-    form2 = Form(method='POST', action=uri + '/addexample', 
+    form2 = Form(method='POST', action=uri + '/addexample',
                  _=[Input(type='textarea', name='content'),
                     Input(type='submit', value='Add example')])
-    form3 = Form(method='POST', action=uri + '/addtext', 
-                 _=[TextArea(name='content', width='90%', rows='10'), 
+    form3 = Form(method='POST', action=uri + '/addtext',
+                 _=[TextArea(name='content', width='90%', rows='10'),
                     Input(type='submit', value='Add text')])
     return '<hr>' + form1() + form2() + form3()
 
-def get_uri(x): 
+def get_uri(x):
     return x

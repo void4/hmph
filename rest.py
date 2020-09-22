@@ -1,7 +1,7 @@
 """
 Information about our URI tree structure takes three forms:
 1. URI strings like /id/123 associated with GET or POST and with parameters
-2. Form elements like 
+2. Form elements like
   <form method="POST" action="%(uri)s/addelement">
     <input type="textarea" name="content">
   ...</form>
@@ -14,7 +14,7 @@ It might also make sense to keep the ID registry here.
 """
 
 import cgi
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from parser   import parse_literal, parse_signature
 from registry import get_actor, get_editor, get_id, get_uri, id_is_defined, \
@@ -155,8 +155,8 @@ class HmphDispatcher(webserver.MetaDispatcher):
         actor.add_method(selector, parameters)
         element = actor.get_method(selector)
         http.redirect('%s/edit?%s#%s' % \
-                      (get_uri(actor), 
-                       urllib.urlencode({'serial_id': element.serial_id}),
+                      (get_uri(actor),
+                       urllib.parse.urlencode({'serial_id': element.serial_id}),
                        element.serial_id))
 
     def post_id_V_addtext(self, http, hid, content):
@@ -187,7 +187,7 @@ def parse_args(method, query):
 
 def parse_arg(p, query):
     if p not in query:
-        raise 'Missing parameter', p
+        raise Exception('Missing parameter', p)
     lit_expr = parse_literal(query[p])
     return lit_expr.run(None, None)
 
@@ -209,7 +209,7 @@ def element_delete_form(target, serial_id):
     <input type="hidden" name="serial_id" value="%(serial_id)s">
     <input type="submit" value="Delete">
    </form>
-''' % { 'uri': get_uri(target), 
+''' % { 'uri': get_uri(target),
         'serial_id': serial_id }
 
 def element_edit_form(target, serial_id):
@@ -218,7 +218,7 @@ def element_edit_form(target, serial_id):
     <input type="hidden" name="serial_id" value="%(serial_id)s">
     <input type="submit" value="Edit">
    </form>
-''' % { 'uri': get_uri(target), 
+''' % { 'uri': get_uri(target),
         'serial_id': serial_id }
 
 def element_editor_form(target, serial_id, body):
@@ -228,7 +228,7 @@ def element_editor_form(target, serial_id, body):
 <input type="submit" value="Save">
 <textarea name="body" style="width:100%%" rows="10">%(body)s</textarea>
 </form>
-''' % { 'uri': get_uri(target), 
+''' % { 'uri': get_uri(target),
         'serial_id': serial_id,
         'body': cgi.escape(body) }
 
