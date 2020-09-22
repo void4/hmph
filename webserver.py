@@ -33,7 +33,6 @@ class DispatchingHTTPRequestHandler(BaseHTTPRequestHandler):
             self.send_error(404, 'Object Not Found: %s' % self.path)
             return
         try:
-            print(parse_query(query_str))
             handler(self, *params, **parse_query(query_str))
         except:
             exception_type, exception_value = sys.exc_info()[:2]
