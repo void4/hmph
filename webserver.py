@@ -33,6 +33,7 @@ class DispatchingHTTPRequestHandler(BaseHTTPRequestHandler):
             self.send_error(404, 'Object Not Found: %s' % self.path)
             return
         try:
+            print(parse_query(query_str))
             handler(self, *params, **parse_query(query_str))
         except:
             exception_type, exception_value = sys.exc_info()[:2]
@@ -53,13 +54,17 @@ class DispatchingHTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body.encode("utf8"))
 
+def decode_str(thing):
+    return thing if isinstance(thing, str) else thing.decode("utf8")
+
 def parse_qs(string):
     query = urllib.parse.parse_qs(string)
     result = {}
     for key in query:
         if len(query[key]) != 1:
             raise Exception('Multiple values for key', key)
-        result[key] = query[key][0]
+        value = query[key][0]
+        result[decode_str(key)] = decode_str(value)
     return result
 
 def _lookup(pairs, path_str):
