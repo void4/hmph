@@ -45,16 +45,16 @@ class DispatchingHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_header('Location', uri)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write('Redirect to <a href="%s">%s</a>' % (uri, uri))
+        self.wfile.write(('Redirect to <a href="%s">%s</a>' % (uri, uri)).encode("utf8"))
 
     def send_html(self, body):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write(body)
+        self.wfile.write(body.encode("utf8"))
 
 def parse_qs(string):
-    query = cgi.parse_qs(string)
+    query = urllib.parse.parse_qs(string)
     result = {}
     for key in query:
         if len(query[key]) != 1:

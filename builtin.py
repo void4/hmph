@@ -1,4 +1,4 @@
-import cgi
+import html
 
 from actors   import Actor, Example, Method, Script, StampedActor, Text, \
                      void_actor
@@ -318,7 +318,7 @@ class String(Actor):
 
     def link_caption(self):
         s = self.primitive_data
-        return cgi.escape(quoted_string(abbreviate_string(s)))
+        return html.escape(quoted_string(abbreviate_string(s)))
 
     def __repr__(self):
         return '<<String %s>>' % self.primitive_data
@@ -331,7 +331,7 @@ class String(Actor):
 
     def show_data(self):
         return """Value: '%s'\n<hr>\n""" % \
-            cgi.escape(self.primitive_data)  # XXX escape quotes
+            html.escape(self.primitive_data)  # XXX escape quotes
 
     def prim_length(self, env):
         return Number(len(self.primitive_data))
@@ -354,7 +354,7 @@ class String(Actor):
         return String(self.primitive_data + str.primitive_data)
 
     def prim_htmlescaped(self, env):
-        return String(cgi.escape(self.primitive_data, True))
+        return String(html.escape(self.primitive_data, True))
 
 def is_string(actor):
     return actor.__class__ == String
