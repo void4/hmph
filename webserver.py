@@ -17,7 +17,7 @@ class DispatchingHTTPRequestHandler(BaseHTTPRequestHandler):
         self._handle(self._get_dispatcher().posters, self._parse_post_params)
 
     def _parse_post_params(self, url_query_str):
-        content_length = int(self.headers.getheader('Content-Length'))
+        content_length = int(self.headers.get('Content-Length'))
         if content_length == 0:
             data = ''
         else:
