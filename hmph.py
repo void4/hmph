@@ -28,7 +28,7 @@ def main():
         # XXX raises an exception in Windows if oldsnapshot exists
         # XXX should never overwrite old snapshots
         os.rename('snapshot.py', 'oldsnapshot')
-        doss.serialize(registry.get_system(), file('snapshot.py', 'w'))
+        doss.serialize(registry.get_system(), open('snapshot.py', 'w'))
 
 if __name__ == '__main__':
     # XXX do these tests after starting up the server, to minimize the
