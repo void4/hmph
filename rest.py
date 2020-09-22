@@ -199,7 +199,7 @@ def method_call_form(target, selector, argument_field):
     <input type="hidden" name="selector" value="%(selector)s">
     %(body)s
    </form>
-''' % { 'uri': get_uri(target), 
+''' % { 'uri': get_uri(target),
         'selector': html.escape(selector, True),
         'body': body }
 
