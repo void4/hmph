@@ -13,7 +13,7 @@ Unfortunately, #2 mixes in user-interface aspects.
 It might also make sense to keep the ID registry here.
 """
 
-import cgi
+import html
 import urllib.request, urllib.parse, urllib.error
 
 from parser   import parse_literal, parse_signature
@@ -200,7 +200,7 @@ def method_call_form(target, selector, argument_field):
     %(body)s
    </form>
 ''' % { 'uri': get_uri(target), 
-        'selector': cgi.escape(selector, True),
+        'selector': html.escape(selector, True),
         'body': body }
 
 def element_delete_form(target, serial_id):
@@ -230,7 +230,7 @@ def element_editor_form(target, serial_id, body):
 </form>
 ''' % { 'uri': get_uri(target),
         'serial_id': serial_id,
-        'body': cgi.escape(body) }
+        'body': html.escape(body) }
 
 def adder_form(target):
     return '''

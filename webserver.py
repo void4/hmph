@@ -1,5 +1,5 @@
 from http.server import BaseHTTPRequestHandler
-import cgi
+import html
 import re
 import sys
 import urllib.parse
@@ -36,7 +36,7 @@ class DispatchingHTTPRequestHandler(BaseHTTPRequestHandler):
             handler(self, *params, **parse_query(query_str))
         except:
             exception_type, exception_value = sys.exc_info()[:2]
-            complaint = cgi.escape('%s: %s' % (exception_type, exception_value))
+            complaint = html.escape('%s: %s' % (exception_type, exception_value))
             self.send_html('Error: ' + complaint)
             raise
 

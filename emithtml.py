@@ -1,10 +1,10 @@
-import cgi
+import html
 
 def emit(obj, attribute=False):
     if type(obj) == list:
         return ''.join([emit(element) for element in obj])
     if type(obj) == str:
-        return cgi.escape(obj, attribute)
+        return html.escape(obj, attribute)
     if type(obj) == type(emit):
         return obj()            # XXX what if attribute=True?
     raise Exception('Bad type', obj)
@@ -12,7 +12,7 @@ def emit(obj, attribute=False):
 def emit_attributes(dict):
     attrs = []
     for key in dict:
-        attrs.append(' %s="%s"' % (cgi.escape(key),
+        attrs.append(' %s="%s"' % (html.escape(key),
                                    emit(dict[key], attribute=True)))
     return ''.join(attrs)
 
